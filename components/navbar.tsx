@@ -17,7 +17,14 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
+    <nav
+      className={cn(
+        'fixed top-0 w-full z-50 backdrop-blur-xl border-b transition-colors duration-300',
+        isOpen
+          ? 'bg-background/95 dark:bg-background/95 border-border'
+          : 'bg-background/45 dark:bg-background/35 border-border/50 dark:border-border/40 supports-[backdrop-filter]:bg-background/35 dark:supports-[backdrop-filter]:bg-background/25'
+      )}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center gap-4 h-16">
           <a href="/" className="font-bold text-xl text-gradient shrink-0">

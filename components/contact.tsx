@@ -4,6 +4,7 @@ import { Mail, Linkedin, Github, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useScrollAnimation } from '@/hooks/use-scroll-animation';
 
 export default function Contact() {
@@ -12,21 +13,45 @@ export default function Contact() {
     name: '',
     email: '',
     message: '',
+    _hp: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log(formState);
-    setFormState({ name: '', email: '', message: '' });
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formState),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+
+      if (!res.ok) {
+        toast.error(data.error ?? 'Something went wrong. Please try again.');
+        return;
+      }
+
+      toast.success('Message sent. I will get back to you soon.');
+      setFormState({ name: '', email: '', message: '', _hp: '' });
+    } catch {
+      toast.error('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactLinks = [
     {
       icon: Mail,
       label: 'Email',
-      href: 'mailto:mohammedumer3353@gmmail.com',
-      display: 'mohammedumer3353@gmmail.com',
+      href: 'mailto:mohammedumer3353@gmail.com',
+      display: 'mohammedumer3353@gmail.com',
     },
     {
       icon: Linkedin,
@@ -89,7 +114,20 @@ export default function Contact() {
             }}
           >
             <h3 className="text-xl font-bold mb-6">Send me a message</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="relative space-y-4">
+              <div className="pointer-events-none absolute left-[-9999px] h-0 w-0 overflow-hidden" aria-hidden>
+                <label htmlFor="contact-hp">Company</label>
+                <input
+                  id="contact-hp"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formState._hp}
+                  onChange={(e) =>
+                    setFormState({ ...formState, _hp: e.target.value })
+                  }
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Name</label>
                 <Input
@@ -99,8 +137,10 @@ export default function Contact() {
                   onChange={(e) =>
                     setFormState({ ...formState, name: e.target.value })
                   }
-                  className="bg-background border-white/10"
+                  className="bg-background border-border"
                   required
+                  disabled={isSubmitting}
+                  autoComplete="name"
                 />
               </div>
 
@@ -113,8 +153,10 @@ export default function Contact() {
                   onChange={(e) =>
                     setFormState({ ...formState, email: e.target.value })
                   }
-                  className="bg-background border-white/10"
+                  className="bg-background border-border"
                   required
+                  disabled={isSubmitting}
+                  autoComplete="email"
                 />
               </div>
 
@@ -126,17 +168,20 @@ export default function Contact() {
                   onChange={(e) =>
                     setFormState({ ...formState, message: e.target.value })
                   }
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-cyan-600 dark:focus:ring-cyan-500 focus:border-transparent resize-none"
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-cyan-600 dark:focus:ring-cyan-500 focus:border-transparent resize-none disabled:opacity-60"
                   rows={4}
                   required
+                  disabled={isSubmitting}
+                  autoComplete="off"
                 ></textarea>
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white dark:bg-cyan-500 dark:hover:bg-cyan-600 dark:text-black font-semibold"
+                disabled={isSubmitting}
+                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white dark:bg-cyan-500 dark:hover:bg-cyan-600 dark:text-black font-semibold disabled:opacity-60"
               >
-                Send Message
+                {isSubmitting ? 'Sending…' : 'Send Message'}
               </Button>
             </form>
           </div>

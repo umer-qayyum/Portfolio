@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Providers } from './providers'
+import FloatingWhatsApp from '@/components/floating-whatsapp'
 import './globals.css'
 
 const geistSans = Geist({
@@ -52,6 +53,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <Providers>
           {children}
+          <FloatingWhatsApp />
           <Analytics />
         </Providers>
       </body>
